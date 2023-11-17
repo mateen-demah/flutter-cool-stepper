@@ -31,6 +31,10 @@ class CoolStepper extends StatefulWidget {
   /// default is false
   final bool showErrorSnackbar;
 
+  /// added by me to give a custorm final button
+  final Widget? finishButton;
+
+
   const CoolStepper({
     Key? key,
     required this.steps,
@@ -38,10 +42,11 @@ class CoolStepper extends StatefulWidget {
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 20.0),
     this.config = const CoolStepperConfig(),
     this.showErrorSnackbar = false,
+    this.finishButton,
   }) : super(key: key);
 
   @override
-  State<CoolStepper> createState() => _CoolStepperState();
+  _CoolStepperState createState() => _CoolStepperState();
 }
 
 class _CoolStepperState extends State<CoolStepper> {
@@ -62,7 +67,6 @@ class _CoolStepperState extends State<CoolStepper> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
-    return null;
   }
 
   bool _isFirst(int index) {
@@ -73,9 +77,8 @@ class _CoolStepperState extends State<CoolStepper> {
     return widget.steps.length - 1 == index;
   }
 
-  Future<void> onStepNext() async {
-    // final context
-    final validation = await widget.steps[currentStep].validation!();
+  void onStepNext() {
+    final validation = widget.steps[currentStep].validation!();
 
     /// [validation] is null, no validation rule
     if (validation == null) {
@@ -83,32 +86,28 @@ class _CoolStepperState extends State<CoolStepper> {
         setState(() {
           currentStep++;
         });
-
-        if (mounted) FocusScope.of(context).unfocus();
-
-        await switchToPage(currentStep);
+        FocusScope.of(context).unfocus();
+        switchToPage(currentStep);
       } else {
         widget.onCompleted();
       }
     } else {
-      if (!mounted) return;
-
       /// [showErrorSnackbar] is true, Show error snackbar rule
       if (widget.showErrorSnackbar) {
         final flush = Flushbar(
           message: validation,
           flushbarStyle: FlushbarStyle.FLOATING,
-          margin: const EdgeInsets.all(8.0),
-          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          margin: EdgeInsets.all(8.0),
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
           icon: Icon(
             Icons.info_outline,
             size: 28.0,
             color: Theme.of(context).primaryColor,
           ),
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
           leftBarIndicatorColor: Theme.of(context).primaryColor,
         );
-        await flush.show(context);
+        flush.show(context);
 
         // final snackBar = SnackBar(content: Text(validation));
         // ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -130,7 +129,7 @@ class _CoolStepperState extends State<CoolStepper> {
     final content = Expanded(
       child: PageView(
         controller: _controller,
-        physics: const NeverScrollableScrollPhysics(),
+        physics: NeverScrollableScrollPhysics(),
         children: widget.steps.map((step) {
           return CoolStepperView(
             step: step,
@@ -141,10 +140,12 @@ class _CoolStepperState extends State<CoolStepper> {
       ),
     );
 
-    final counter = Text(
-      "${widget.config.stepText ?? 'STEP'} ${currentStep + 1} ${widget.config.ofText ?? 'OF'} ${widget.steps.length}",
-      style: const TextStyle(
-        fontWeight: FontWeight.bold,
+    final counter = Container(
+      child: Text(
+        "${widget.config.stepText ?? 'STEP'} ${currentStep + 1} ${widget.config.ofText ?? 'OF'} ${widget.steps.length}",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
 
@@ -176,31 +177,75 @@ class _CoolStepperState extends State<CoolStepper> {
       return backLabel;
     }
 
-    final buttons = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        TextButton(
-          onPressed: onStepBack,
-          child: Text(
-            getPrevLabel(),
-            style: const TextStyle(color: Colors.grey),
-          ),
-        ),
-        counter,
-        TextButton(
-          onPressed: onStepNext,
-          child: Text(
-            getNextLabel(),
-            style: const TextStyle(
-              color: Colors.green,
+    final isButtonAvailable = _isLast(currentStep) && widget.finishButton != null;
+
+    final buttons = Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+
+            TextButton(
+              onPressed: onStepBack,
+              child: Text(
+                getPrevLabel(),
+                style: TextStyle(color: Colors.grey),
+              ),
             ),
-          ),
-        ),
-      ],
+
+            counter,
+          if(isButtonAvailable)
+            widget.finishButton!
+          else
+            TextButton(
+              style: TextButton.styleFrom(primary: widget.config.lastTextColor ?? Colors.blue),
+              onPressed: onStepNext,
+              child: Text(
+                getNextLabel(),
+                style: TextStyle(
+                  color:  widget.config.nextTextColor ?? Colors.white,
+                ),
+              ),
+            ),
+          // if(isButtonAvailable)
+          //   Expanded(child: TextButton(
+          //     onPressed: onStepBack,
+          //     child: Text(
+          //       getPrevLabel(),
+          //       style: TextStyle(color: Colors.grey),
+          //     ),
+          //   ),)
+          // else
+          // TextButton(
+          //   onPressed: onStepBack,
+          //   child: Text(
+          //     getPrevLabel(),
+          //     style: TextStyle(color: Colors.grey),
+          //   ),
+          // ),
+          // if(isButtonAvailable)
+          //   Expanded(child: counter)
+          // else
+          // counter,
+          // if(isButtonAvailable)
+          //   Expanded(child: widget.finishButton!)
+          // else
+          // TextButton(
+          //   onPressed: onStepNext,
+          //   child: Text(
+          //     getNextLabel(),
+          //     style: TextStyle(
+          //       color: widget.config.lastTextColor ?? Colors.green,
+          //     ),
+          //   ),
+          // ),
+        ],
+      ),
     );
 
-    return Column(
-      children: [content, buttons],
+    return Container(
+      child: Column(
+        children: [content, buttons],
+      ),
     );
   }
 }
