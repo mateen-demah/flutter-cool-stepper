@@ -55,6 +55,9 @@ class CoolStepperConfig {
 
   final bool isHeaderEnabled;
 
+  /// this is added by Halik to help change last text color
+  final Color? lastTextColor, nextTextColor;
+
   const CoolStepperConfig({
     this.backText = 'PRE',
     this.nextText = 'NEXT',
@@ -69,5 +72,7 @@ class CoolStepperConfig {
     this.nextTextList,
     this.finalText = 'FINISH',
     this.isHeaderEnabled = true,
+    this.lastTextColor ,
+    this.nextTextColor,
   });
 }
