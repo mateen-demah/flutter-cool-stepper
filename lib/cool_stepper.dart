@@ -77,8 +77,8 @@ class _CoolStepperState extends State<CoolStepper> {
     return widget.steps.length - 1 == index;
   }
 
-  void onStepNext() {
-    final validation = widget.steps[currentStep].validation!();
+  void onStepNext() async{
+    final validation = await widget.steps[currentStep].validation!();
 
     /// [validation] is null, no validation rule
     if (validation == null) {
