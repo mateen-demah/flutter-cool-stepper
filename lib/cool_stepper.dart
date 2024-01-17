@@ -95,7 +95,7 @@ class _CoolStepperState extends State<CoolStepper> {
       /// [showErrorSnackbar] is true, Show error snackbar rule
       if (widget.showErrorSnackbar) {
         final flush = Flushbar(
-          message: validation,
+          message: (validation as String?),
           flushbarStyle: FlushbarStyle.FLOATING,
           margin: EdgeInsets.all(8.0),
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
