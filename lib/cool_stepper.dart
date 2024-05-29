@@ -197,7 +197,7 @@ class _CoolStepperState extends State<CoolStepper> {
             widget.finishButton!
           else
             TextButton(
-              style: TextButton.styleFrom(primary: widget.config.lastTextColor ?? Colors.blue),
+              style: TextButton.styleFrom(foregroundColor: widget.config.lastTextColor ?? Colors.blue),
               onPressed: onStepNext,
               child: Text(
                 getNextLabel(),
